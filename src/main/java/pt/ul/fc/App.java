@@ -8,6 +8,7 @@ import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 
 import java.io.IOException;
+import java.io.File;
 import java.util.Arrays;
 
 public class App {
@@ -31,21 +32,22 @@ public class App {
             Panel columnsPanel = new Panel();
             columnsPanel.setLayoutManager(new LinearLayout(Direction.HORIZONTAL));
 
+            FileBrowser fileBrowser = new FileBrowser();
+            File currentDir = new File(System.getProperty("user.dir"));
+
 
             ActionListBox leftList = new ActionListBox(new TerminalSize(40, 20));
-            leftList.addItem("Pasta_Esquerda", () -> {});
-            leftList.addItem("ficheiro1.txt", () -> {});
+            fileBrowser.updateList(leftList, currentDir);
             
             ActionListBox rightList = new ActionListBox(new TerminalSize(40, 20));
-            rightList.addItem("Pasta_Direita", () -> {});
-            rightList.addItem("ficheiro2.txt", () -> {});
+            fileBrowser.updateList(rightList, currentDir);
 
-            columnsPanel.addComponent(leftList.withBorder(Borders.singleLine("Esquerda")));
-            columnsPanel.addComponent(rightList.withBorder(Borders.singleLine("Direita")));
+            columnsPanel.addComponent(leftList.withBorder(Borders.singleLine("Left Pane")));
+            columnsPanel.addComponent(rightList.withBorder(Borders.singleLine("Right Pane")));
 
             Panel buttonPanel = new Panel();
             buttonPanel.setLayoutManager(new LinearLayout(Direction.HORIZONTAL));
-            buttonPanel.addComponent(new Button("Sair", window::close));
+            buttonPanel.addComponent(new Button("Exit", window::close));
 
             mainPanel.addComponent(columnsPanel);
             mainPanel.addComponent(buttonPanel);
@@ -57,7 +59,6 @@ public class App {
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            // Garantir que o ecrã fecha corretamente ao sair
             if (screen != null) {
                 try {
                     screen.stopScreen();

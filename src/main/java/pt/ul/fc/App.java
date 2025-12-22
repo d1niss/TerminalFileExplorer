@@ -16,45 +16,41 @@ public class App {
         Screen screen = null;
 
         try {
-            // 1. Configurar o Terminal e o Screen
             terminal = new DefaultTerminalFactory().createTerminal();
             screen = new TerminalScreen(terminal);
             screen.startScreen();
 
-            // 2. Criar a GUI baseada em janelas
             WindowBasedTextGUI gui = new MultiWindowTextGUI(screen);
 
-            // 3. Criar a janela principal
             BasicWindow window = new BasicWindow("Terminal File Explorer");
-            // Define a janela como Full Screen (ecrã completo)
             window.setHints(Arrays.asList(Window.Hint.FULL_SCREEN));
 
-            // 4. Criar o painel principal com layout Horizontal (duas colunas)
             Panel mainPanel = new Panel();
-            mainPanel.setLayoutManager(new LinearLayout(Direction.HORIZONTAL));
+            mainPanel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
 
-            // 5. Criar as duas colunas (Usando ActionListBox em vez de ListBox)
-            // A ActionListBox precisa de uma Runnable (ação), por isso passamos () -> {} (vazio) por enquanto
-            
-            // Coluna da Esquerda
+            Panel columnsPanel = new Panel();
+            columnsPanel.setLayoutManager(new LinearLayout(Direction.HORIZONTAL));
+
+
             ActionListBox leftList = new ActionListBox(new TerminalSize(40, 20));
-            leftList.addItem("Pasta_Esquerda", () -> { /* Ação ao entrar na pasta */ });
-            leftList.addItem("ficheiro1.txt", () -> { /* Ação ao abrir ficheiro */ });
+            leftList.addItem("Pasta_Esquerda", () -> {});
+            leftList.addItem("ficheiro1.txt", () -> {});
             
-            // Coluna da Direita
             ActionListBox rightList = new ActionListBox(new TerminalSize(40, 20));
-            rightList.addItem("Pasta_Direita", () -> { });
-            rightList.addItem("ficheiro2.txt", () -> { });
+            rightList.addItem("Pasta_Direita", () -> {});
+            rightList.addItem("ficheiro2.txt", () -> {});
 
-            // Adicionar as listas ao painel principal com bordas
-            mainPanel.addComponent(leftList.withBorder(Borders.singleLine("Esquerda")));
-            mainPanel.addComponent(rightList.withBorder(Borders.singleLine("Direita")));
+            columnsPanel.addComponent(leftList.withBorder(Borders.singleLine("Esquerda")));
+            columnsPanel.addComponent(rightList.withBorder(Borders.singleLine("Direita")));
 
-            // Adicionar o painel à janela e iniciar a GUI
+            Panel buttonPanel = new Panel();
+            buttonPanel.setLayoutManager(new LinearLayout(Direction.HORIZONTAL));
+            buttonPanel.addComponent(new Button("Sair", window::close));
+
+            mainPanel.addComponent(columnsPanel);
+            mainPanel.addComponent(buttonPanel);
+
             window.setComponent(mainPanel);
-            
-            // Adicionar botão de sair para fechar a aplicação facilmente durante os testes
-            mainPanel.addComponent(new Button("Sair", window::close));
 
             gui.addWindowAndWait(window);
 

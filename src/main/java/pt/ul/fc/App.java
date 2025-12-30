@@ -32,18 +32,13 @@ public class App {
             Panel columnsPanel = new Panel();
             columnsPanel.setLayoutManager(new LinearLayout(Direction.HORIZONTAL));
 
-            FileBrowser fileBrowser = new FileBrowser();
-            File currentDir = new File(System.getProperty("user.dir"));
+            File startDir = new File(System.getProperty("user.dir"));
 
+            FilePanel leftPanel = new FilePanel("Left panel", startDir);
+            FilePanel rightPanel = new FilePanel("Right panel", startDir);
 
-            ActionListBox leftList = new ActionListBox(new TerminalSize(40, 20));
-            fileBrowser.updateList(leftList, currentDir);
-            
-            ActionListBox rightList = new ActionListBox(new TerminalSize(40, 20));
-            fileBrowser.updateList(rightList, currentDir);
-
-            columnsPanel.addComponent(leftList.withBorder(Borders.singleLine("Left Pane")));
-            columnsPanel.addComponent(rightList.withBorder(Borders.singleLine("Right Pane")));
+            columnsPanel.addComponent(leftPanel.getPanel());
+            columnsPanel.addComponent(rightPanel.getPanel());
 
             Panel buttonPanel = new Panel();
             buttonPanel.setLayoutManager(new LinearLayout(Direction.HORIZONTAL));

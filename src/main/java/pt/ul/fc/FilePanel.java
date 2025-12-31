@@ -4,6 +4,10 @@ import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.ActionListBox;
 import com.googlecode.lanterna.gui2.Borders;
 import com.googlecode.lanterna.gui2.Panel;
+import com.googlecode.lanterna.gui2.Interactable;
+import com.googlecode.lanterna.gui2.InputFilter;
+import com.googlecode.lanterna.input.KeyStroke;
+import com.googlecode.lanterna.input.KeyType;
 
 import java.io.File;
 import java.util.Arrays;
@@ -17,6 +21,17 @@ public class FilePanel {
     public FilePanel(String title, File startDir) {
         this.currentDirectory = startDir;
         this.listBox = new ActionListBox(new TerminalSize(40, 20));
+
+        this.listBox.setInputFilter(new InputFilter() {
+            @Override
+            public boolean onInput(com.googlecode.lanterna.gui2.Interactable interactable, com.googlecode.lanterna.input.KeyStroke keyStroke) {
+                if (keyStroke.getKeyType() == KeyType.Delete) {
+                    deleteSelectedFile();
+                    return false;
+                }
+                return true;
+            }
+        });
         
         this.panel = new Panel();
         this.panel.addComponent(listBox.withBorder(Borders.singleLine(title)));
@@ -30,6 +45,17 @@ public class FilePanel {
 
     public File getCurrentDirectory() {
         return currentDirectory;
+    }
+
+    private void deleteSelectedFile() {
+        Runnable selectedItem = listBox.getSelectedItem();
+        if (selectedItem instanceof FileListItem) {
+            FileListItem fileItem = (FileListItem) selectedItem;
+            File fileToDelete = fileItem.getFile();
+            if (fileToDelete.delete()) {
+                updateList();
+            }
+        }
     }
 
     private void updateList() {
@@ -55,13 +81,7 @@ public class FilePanel {
 
             for (File file : files) {
                 String displayName = file.getName() + (file.isDirectory() ? "/" : "");
-
-                listBox.addItem(displayName, () -> {
-                    if (file.isDirectory()) {
-                        changeDirectory(file);
-                    } else {
-                    }
-                });
+                listBox.addItem(new FileListItem(displayName, file));
             }
         }
     }
@@ -70,6 +90,33 @@ public class FilePanel {
         if (newDir != null && newDir.isDirectory()) {
             this.currentDirectory = newDir;
             updateList();
+        }
+    }
+
+    private class FileListItem implements Runnable {
+        private final String displayName;
+        private final File file;
+
+        public FileListItem(String displayName, File file) {
+            this.displayName = displayName;
+            this.file = file;
+        }
+
+        public File getFile() {
+            return file;
+        }
+
+        @Override
+        public void run() {
+            if (file.isDirectory()) {
+                changeDirectory(file);
+
+            }
+        }
+
+        @Override
+        public String toString() {
+            return displayName;
         }
     }
 }

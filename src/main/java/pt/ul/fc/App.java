@@ -6,6 +6,7 @@ import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.screen.TerminalScreen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
+import com.googlecode.lanterna.input.KeyType;
 
 import java.io.IOException;
 import java.io.File;
@@ -33,9 +34,13 @@ public class App {
             columnsPanel.setLayoutManager(new LinearLayout(Direction.HORIZONTAL));
 
             File startDir = new File(System.getProperty("user.dir"));
+            File homeDir = new File(System.getProperty("user.home"));
 
-            FilePanel leftPanel = new FilePanel("Left panel", startDir);
-            FilePanel rightPanel = new FilePanel("Right panel", startDir);
+            FilePanel leftPanel = new FilePanel("Left panel", startDir, KeyType.ArrowRight);
+            FilePanel rightPanel = new FilePanel("Right panel", homeDir, KeyType.ArrowLeft);
+
+            leftPanel.setOtherPanel(rightPanel);
+            rightPanel.setOtherPanel(leftPanel);
 
             columnsPanel.addComponent(leftPanel.getPanel());
             columnsPanel.addComponent(rightPanel.getPanel());

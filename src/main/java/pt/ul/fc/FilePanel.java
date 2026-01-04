@@ -11,6 +11,10 @@ import com.googlecode.lanterna.input.KeyType;
 
 import java.io.File;
 import java.util.Arrays;
+import java.io.IOException;
+import java.nio.file.Files;;
+import java.nio.file.StandardCopyOption;
+
 
 public class FilePanel {
 
@@ -18,15 +22,22 @@ public class FilePanel {
     private final ActionListBox listBox;
     private File currentDirectory;
 
-    public FilePanel(String title, File startDir) {
+    private FilePanel otherPanel;
+    private final KeyType movekey;
+
+    public FilePanel(String title, File startDir, KeyType movekey) {
         this.currentDirectory = startDir;
+        this.movekey = movekey;
         this.listBox = new ActionListBox(new TerminalSize(40, 20));
 
         this.listBox.setInputFilter(new InputFilter() {
             @Override
             public boolean onInput(com.googlecode.lanterna.gui2.Interactable interactable, com.googlecode.lanterna.input.KeyStroke keyStroke) {
-                if (keyStroke.getKeyType() == KeyType.Delete) {
+                if (keyStroke.getKeyType() == KeyType.Delete || keyStroke.getKeyType() == KeyType.Backspace) {
                     deleteSelectedFile();
+                    return false;
+                }else if(keyStroke.getKeyType() == movekey){
+                    moveSelectedFile();
                     return false;
                 }
                 return true;
@@ -37,6 +48,10 @@ public class FilePanel {
         this.panel.addComponent(listBox.withBorder(Borders.singleLine(title)));
         
         updateList();
+    }
+
+    public void setOtherPanel(FilePanel otherPanel) {
+        this.otherPanel = otherPanel;
     }
 
     public Panel getPanel() {
@@ -58,7 +73,30 @@ public class FilePanel {
         }
     }
 
-    private void updateList() {
+    private void moveSelectedFile(){
+        if (otherPanel == null) {
+            return;
+        }
+        Runnable selectedItem = listBox.getSelectedItem();
+        if(selectedItem instanceof FileListItem){
+            FileListItem fileItem = (FileListItem) selectedItem;
+            File sourceFile = fileItem.getFile();
+            File targetDir = otherPanel.getCurrentDirectory();
+
+            if (sourceFile != null && targetDir != null && targetDir.isDirectory()) {
+                File targetFile = new File(targetDir, sourceFile.getName());
+                try {
+                    Files.move(sourceFile.toPath(), targetFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    this.updateList();
+                    otherPanel.updateList();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void updateList() {
         listBox.clearItems();
 
         if (currentDirectory == null || !currentDirectory.isDirectory()) {
